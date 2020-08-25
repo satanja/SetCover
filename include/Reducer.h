@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <utility>
-
+#include <array>
 #pragma once
 
 class Reducer
@@ -28,6 +28,11 @@ private:
 
     // delete all empty sets
     static void delete_empty(Instance& instance);
+
+    // finds a strong pair of sets if it exists
+    static std::array<int, 2> has_strong_pair(Instance& instance);
+
+    static void include_pair(Instance& instance, std::array<int, 2> indices);
 
 public:
     static std::pair<Instance, int> reduce(Instance& instance);

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <iostream>
 
 std::pair<Instance, int> Reducer::reduce(Instance& instance)
 {
@@ -14,6 +15,7 @@ std::pair<Instance, int> Reducer::reduce(Instance& instance)
         int i = has_unique_element(instance);
         if (i >= 0)
         {
+            std::cout << "unique element: " << i << std::endl;
             k++;
             include_set(instance, i);
             reduced = true;
@@ -23,6 +25,7 @@ std::pair<Instance, int> Reducer::reduce(Instance& instance)
         i = has_common_set(instance);
         if (i >= 0)
         {
+            std::cout << "common set: " << i << std::endl;
             delete_set(instance, i);
             reduced = true;
             continue;
@@ -31,7 +34,19 @@ std::pair<Instance, int> Reducer::reduce(Instance& instance)
         int x = has_common_element(instance);
         if (x >= 0)
         {
+            std::cout << "common element: " << x << std::endl;
             delete_element(instance, x);
+            reduced = true;
+            continue;
+        }
+
+        auto pair = has_strong_pair(instance);
+        if (pair[0] >= 0)
+        {
+            std::cout << "strong pair: (" << pair[0] << ", " << pair[1] << ")" << std::endl;
+            include_pair(instance, pair);
+
+            k += 2;
             reduced = true;
             continue;
         }
@@ -66,6 +81,7 @@ void Reducer::delete_element(Instance& instance, int element)
     {
         family.erase(element);
     }
+    instance.universe.erase(element);
     delete_empty(instance);
 }
 
@@ -165,4 +181,80 @@ void Reducer::delete_empty(Instance& instance)
             }
         }
     } while (reduced);
+}
+
+std::array<int, 2> Reducer::has_strong_pair(Instance& instance)
+{
+    for (int i = 0; i < instance.families.size(); i++)
+    {
+        for (int j = i + 1; j < instance.families.size(); j++)
+        {
+            std::set<int> joined;
+            auto a = instance.families[i];
+            auto b = instance.families[j];
+            std::set_union(a.begin(), a.end(), b.begin(), b.end(), std::inserter(joined, joined.begin()));
+
+            bool isStrong = true;
+            for (int x = 0; x < instance.families.size() && isStrong; x++)
+            {
+                for (int y = x + 1; y < instance.families.size() && isStrong; y++)
+                {
+                    // check all other pairs
+                    if (x == i && y == j) continue;
+
+                    std::set<int> candidate;
+                    auto a = instance.families[x];
+                    auto b = instance.families[y];
+                    std::set_union(a.begin(), a.end(), b.begin(), b.end(), std::inserter(candidate, candidate.begin()));
+
+                    std::set<int> temp;
+                    std::set_union(joined.begin(), joined.end(), candidate.begin(), candidate.end(), std::inserter(temp, temp.begin()));
+                    
+                    if (temp.size() > joined.size())
+                    {
+                        isStrong = false;
+                        break;
+                    }
+                }
+            }
+            
+            if (isStrong)
+            {
+                // joined was a superset of all other pairs
+                return std::array<int, 2> {i, j};
+            }
+        }
+    }
+    
+    // no strong pair found
+    return std::array<int, 2> {-1, -1};
+}
+
+void Reducer::include_pair(Instance& instance, std::array<int, 2> indices)
+{
+    auto a = instance.families[indices[0]];
+    auto b = instance.families[indices[1]];
+    std::set<int> joined;
+    std::set_union(a.begin(), a.end(), b.begin(), b.end(), std::inserter(joined, joined.begin()));
+
+    for (int j = 0; j < instance.families.size(); j++)
+    {
+        if (indices[0] == j || indices[1] == j) continue;
+        for (auto const& x : joined)
+        {
+            instance.families[j].erase(x);
+        }
+    }
+
+    // match universe
+    for (auto const& x : joined)
+    {
+        instance.universe.erase(x);
+    }
+
+    // invariant: indices[0] < indices[1]
+    instance.families.erase(instance.families.begin() + indices[0]);
+    instance.families.erase(instance.families.begin() + indices[1] - 1);
+
+    delete_empty(instance);
 }

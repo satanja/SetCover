@@ -15,13 +15,13 @@ private:
     static void delete_element(Instance& instance, int element);
 
     // finds the set's index with an unique element
-    static int has_unique_element(Instance& instance);
+    static std::vector<int> has_unique_element(Instance& instance);
     
     // include a set to the overall "solution"; delete all included elements
     static void include_set(Instance& instance, int i);
 
     // find a set's index that's a subset of at least one other set
-    static int has_common_set(Instance& instance);
+    static int has_common_set(Instance& instance, int last);
 
     // delete a set from the instance
     static void delete_set(Instance& instance, int i);
@@ -37,4 +37,5 @@ private:
 public:
     static std::pair<Instance, int> reduce(Instance& instance);
     static std::pair<Instance, int> copy_reduce(Instance instance);
+    static int solve_greedy(Instance instance);
 };

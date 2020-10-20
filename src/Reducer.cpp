@@ -8,41 +8,36 @@ std::pair<Instance, int> Reducer::reduce(Instance& instance)
 {
     int k = 0;
     bool reduced = false;
+    int last_common_set = 0;
     do 
     {
         reduced = false;
 
-        int i = has_unique_element(instance);
-        if (i >= 0)
+        bool unique = instance.has_unique_element();
+        if (unique)
         {
-            std::cout << "unique element: " << i << std::endl;
-            k++;
-            include_set(instance, i);
-            reduced = true;
-            continue;
+            // include unique
         }
         
-        i = has_common_set(instance);
-        if (i >= 0)
+        last_common_set = has_common_set(instance, last_common_set);
+        if (last_common_set >= 0)
         {
-            std::cout << "common set: " << i << std::endl;
-            delete_set(instance, i);
+            std::cout << "common set: " << last_common_set << std::endl;
+            delete_set(instance, last_common_set);
             reduced = true;
             continue;
         }
 
-        int x = has_common_element(instance);
-        if (x >= 0)
+        bool common = instance.has_common_element();
+        if (common)
         {
-            std::cout << "common element: " << x << std::endl;
-            delete_element(instance, x);
-            reduced = true;
-            continue;
+            // include common
         }
 
         auto pair = has_strong_pair(instance);
         if (pair[0] >= 0)
         {
+            last_common_set = 0;
             std::cout << "strong pair: (" << pair[0] << ", " << pair[1] << ")" << std::endl;
             include_pair(instance, pair);
 
@@ -85,30 +80,35 @@ void Reducer::delete_element(Instance& instance, int element)
     delete_empty(instance);
 }
 
-int Reducer::has_unique_element(Instance& instance)
+std::vector<int> Reducer::has_unique_element(Instance& instance)
 {
+    std::vector<int> uniques;
     for (auto const& x : instance.universe)
     {
         int count = 0;
-        int i = 0;
-        for (auto const& family : instance.families)
+        int index = 0;
+        for (int i = 0; i < instance.families.size(); i++)
         {
-            count += family.contains(x);
+            auto family = instance.families[i];
+            if (family.contains(x))
+            {
+                count++;
+                index = i;
+            }
+            if (count > 1)
+            {
+                break;
+            }
         }
         
         // possible room for optimization
         if (count == 1)
         {
-            for (int i = 0; i < instance.families.size(); i++)
-            {
-                if (instance.families[i].contains(x))
-                {
-                    return i;
-                }
-            }
+            uniques.push_back(index);
         }
     }
-    return -1;
+    std::sort(uniques.begin(), uniques.end());
+    return uniques;
 }
 
 void Reducer::include_set(Instance& instance, int i)
@@ -134,9 +134,9 @@ void Reducer::include_set(Instance& instance, int i)
     delete_empty(instance);
 }
 
-int Reducer::has_common_set(Instance& instance)
+int Reducer::has_common_set(Instance& instance, int last)
 {
-    for (int i = 0; i < instance.families.size(); i++)
+    for (int i = last; i < instance.families.size(); i++)
     {
         auto s1 = instance.families[i];
         for (int j = 0; j < instance.families.size(); j++)
@@ -257,4 +257,24 @@ void Reducer::include_pair(Instance& instance, std::array<int, 2> indices)
     instance.families.erase(instance.families.begin() + indices[1] - 1);
 
     delete_empty(instance);
+}
+
+int Reducer::solve_greedy(Instance instance) {
+    int size = 0;
+    while (instance.universe.size() != 0 && instance.families.size() != 0) {
+        std::set<int> set = instance.families[0];
+        int index = 0;
+        int max = set.size();
+        for (int i = 0; i < instance.families.size(); i++) {
+            auto X = instance.families[i];
+            if (X.size() > max) {
+                set = X;
+                max = X.size();
+                index = i;
+            }
+        }
+        size++;
+        include_set(instance, index);
+    }
+    return size;
 }

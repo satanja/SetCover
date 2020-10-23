@@ -26,12 +26,12 @@ void read(Instance& instance)
     {
         getline(std::cin, str);
         std::istringstream ss(str);
-        std::set<int> family;
+        std::vector<int> family;
         while (!ss.eof())
         {
             int x;
             ss >> x;
-            family.insert(x);
+            family.push_back(x);
         }
         instance.add_family(family);
     }

@@ -15,7 +15,7 @@ class Instance
 {
 public:
     std::set<int> universe;
-    std::vector<std::set<int>> families;
+    std::vector<std::vector<int>> families;
 
     // A min heap to find unique elements efficiently
     MinHeap min_heap;
@@ -89,7 +89,7 @@ public:
 
     void delete_empty_families() {
 
-        std::vector<std::set<int>> new_families;
+        std::vector<std::vector<int>> new_families;
         for (auto& set : families) {
             if (set.size() > 0)
             {
@@ -103,7 +103,8 @@ public:
         for (int i = 0; i < families.size(); i++) {
             if (i == set) continue;
             for (auto const& x : families[set]) {
-                families[i].erase(x);
+                auto ptr = std::find(families[i].begin(), families[i].end(), x);
+                families[i].erase(ptr);
             }
         }
 
@@ -130,11 +131,14 @@ public:
             }
         }
 
+        std::vector<int> total(combined.begin(), combined.end());
+
         int j = 0;
         for (int i = 0; i < families.size(); i++) {
-            std::set<int> new_set;
-            std::set<int> family = families[i];
-            std::set_difference(family.begin(), family.end(), combined.begin(), combined.end(), std::inserter(new_set, new_set.begin()));
+            std::vector<int> new_set(families[i].size());
+            std::vector<int> family = families[i];
+            auto it = std::set_difference(family.begin(), family.end(), total.begin(), total.end(), new_set.begin());
+            new_set.resize(it - new_set.begin());
             families[i] = new_set;
         }
 
@@ -166,7 +170,7 @@ public:
         families.resize(families_size);
     }
 
-    void add_family(std::set<int> family) {
+    void add_family(std::vector<int> family) {
         last++;
         families[last] = family;
         for (int element : family) {

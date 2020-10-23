@@ -16,37 +16,39 @@ std::pair<Instance, int> Reducer::reduce(Instance& instance)
         bool unique = instance.has_unique_element();
         if (unique)
         {
-            // include unique
+            k += instance.include_unique_element();
+            reduced = true;
         }
         
-        last_common_set = has_common_set(instance, last_common_set);
-        if (last_common_set >= 0)
-        {
-            std::cout << "common set: " << last_common_set << std::endl;
-            delete_set(instance, last_common_set);
-            reduced = true;
-            continue;
-        }
+        //last_common_set = has_common_set(instance, last_common_set);
+        //if (last_common_set >= 0)
+        //{
+        //    std::cout << "common set: " << last_common_set << std::endl;
+        //    delete_set(instance, last_common_set);
+        //    reduced = true;
+        //    continue;
+        //}
 
-        bool common = instance.has_common_element();
-        if (common)
-        {
-            // include common
-        }
+        //bool common = instance.has_common_element();
+        //if (common)
+        //{
+        //    // include common
+        //}
 
-        auto pair = has_strong_pair(instance);
-        if (pair[0] >= 0)
-        {
-            last_common_set = 0;
-            std::cout << "strong pair: (" << pair[0] << ", " << pair[1] << ")" << std::endl;
-            include_pair(instance, pair);
+        //auto pair = has_strong_pair(instance);
+        //if (pair[0] >= 0)
+        //{
+        //    last_common_set = 0;
+        //    std::cout << "strong pair: (" << pair[0] << ", " << pair[1] << ")" << std::endl;
+        //    include_pair(instance, pair);
 
-            k += 2;
-            reduced = true;
-            continue;
-        }
+        //    k += 2;
+        //    reduced = true;
+        //    continue;
+        //}
 
     } while (reduced);
+    instance.clean_up();
     return std::make_pair(instance, k);
 }
 

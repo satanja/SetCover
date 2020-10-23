@@ -9,6 +9,8 @@
 
 #include "PairCompartor.h"
 
+#include <chrono>
+
 void read(Instance& instance)
 {
     int u;
@@ -38,10 +40,28 @@ void read(Instance& instance)
 int main()
 {
     Instance instance;
+
+    auto start = std::chrono::high_resolution_clock::now();
     read(instance);
-    //auto kernel = Reducer::copy_reduce(instance);
-    //std::cout << "|U| = " << kernel.first.universe.size() << std::endl;
-    //std::cout << "|F| = " << kernel.first.families.size() << std::endl;
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double>(stop - start);
+    std::cout << "initializing = " << duration.count() << "s" << std::endl;
+
+    start = std::chrono::high_resolution_clock::now();
+    auto kernel = Reducer::copy_reduce(instance);
+    stop = std::chrono::high_resolution_clock::now();
+    
+    std::cout << "original:" << std::endl;
+    std::cout << "|U| = " << instance.universe.size() << std::endl;
+    std::cout << "|F| = " << instance.families.size() << std::endl;
+    
+    std::cout << std::endl;
+    std::cout << "reduced:" << std::endl;
+
+    duration = std::chrono::duration<double>(stop - start);
+    std::cout << "reduce time = " << duration.count() << "s" << std::endl;
+    std::cout << "|U| = " << kernel.first.universe.size() << std::endl;
+    std::cout << "|F| = " << kernel.first.families.size() << std::endl;
     
     //std::cout << "greedy = " << Reducer::solve_greedy(instance) << std::endl;
     //std::cout << "reduced greedy = " << Reducer::solve_greedy(kernel.first) + kernel.second << std::endl;

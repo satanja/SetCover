@@ -8,21 +8,18 @@ std::pair<Instance, int> Reducer::reduce(Instance& instance)
 {
 	int k = 0;
 	bool reduced = false;
-	int last = 0;
 	do
 	{
 		reduced = false;
 
-		//bool unique = instance.has_unique_element();
-		//if (unique)
-		//{
-		//	int d = instance.include_unique_elements();
-		//	k += d;
-		//	std::cout << d << " uniques" << std::endl;
-		//	last = 0;
-		//	reduced = true;
-		//	continue;
-		//}
+		bool unique = instance.has_unique_element();
+		if (unique)
+		{
+			int d = instance.include_unique_elements();
+			k += d;
+			reduced = true;
+			continue;
+		}
 
 		if (instance.remove_equals())
 		{

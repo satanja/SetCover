@@ -172,7 +172,55 @@ private:
 			decrease_heaps(element);
 			remove_from_adj(element, index);
 		}
+		families[index].resize(0);
+		deleted++;
 	}
+
+	// ## Private reduction routines ##
+	void delete_elements(std::vector<int>& total)
+	{
+		for (int i = 0; i < families.size(); i++)
+		{
+			std::vector<int> new_set(families[i].size());
+			std::vector<int> family = families[i];
+			auto it = std::set_difference(family.begin(),
+										  family.end(),
+										  total.begin(),
+										  total.end(),
+										  new_set.begin());
+			new_set.resize(it - new_set.begin());
+			
+			// maintain data structures in case set is cleared		
+			if (new_set.size() == 0)
+			{
+				// maintain adj and count
+				for (int element : families[i])
+				{
+					remove_from_adj(element, i);
+					update_count(element);
+				}
+
+				// maintain deleted
+				deleted++;
+			}
+			families[i] = new_set;
+		}
+	}
+
+	// ## Finalization ##
+	void delete_empty_families()
+	{
+		std::vector<std::vector<int>> new_families;
+		for (auto& set : families)
+		{
+			if (set.size() > 0)
+			{
+				new_families.push_back(set);
+			}
+		}
+		families = new_families;
+	}
+
 public:
 
 	// ## INITIALIZATION ##
@@ -278,7 +326,6 @@ public:
 			{
 				int index = list[i];
 				subset_update(families[index], index);
-				families[index].resize(0);
 			}
 		}
 
@@ -306,105 +353,12 @@ public:
 		for (auto i : subsets)
 		{
 			subset_update(families[i], i);
-			families[i].resize(0);
 		}
 
 		return result;
 	}
 
 	// ## REDUCTION OPERATIONS ## 
-
-	void delete_elements(std::vector<int>& total)
-	{
-		for (int i = 0; i < families.size(); i++)
-		{
-			std::vector<int> new_set(families[i].size());
-			std::vector<int> family = families[i];
-			auto it = std::set_difference(family.begin(),
-										  family.end(),
-										  total.begin(),
-										  total.end(),
-										  new_set.begin());
-			new_set.resize(it - new_set.begin());
-			families[i] = new_set;
-		}
-	}
-
-	void delete_heap(int set)
-	{
-		for (auto const& x : families[set])
-		{
-			int min_addr = minAddresses->at(x);
-			int max_addr = maxAddresses->at(x);
-
-			min_heap.decrease_key(std::make_pair(x, -1), min_addr);
-			min_heap.extract_min();
-
-			max_heap.increase_key(std::make_pair(x, universe.size() + 1), max_addr);
-			max_heap.extract_max();
-
-			minAddresses->at(x) = -1;
-			maxAddresses->at(x) = -1;
-		}
-	}
-
-	void delete_empty_families()
-	{
-		std::vector<std::vector<int>> new_families;
-		for (auto& set : families)
-		{
-			if (set.size() > 0)
-			{
-				new_families.push_back(set);
-			}
-		}
-		families = new_families;
-	}
-
-	void include_set(std::vector<int>& set)
-	{
-		delete_elements(set);
-		auto max = universe.size() + 1;
-		for (auto const& element : set)
-		{
-			universe.erase(element);
-			int max_index = maxAddresses->at(element);
-			int min_index = minAddresses->at(element);
-
-			max_heap.increase_key(std::make_pair(element, max), max_index);
-			max_heap.extract_max();
-			min_heap.decrease_key(std::make_pair(element, -1), min_index);
-			min_heap.extract_min();
-		}
-	}
-
-	void include_sets(std::vector<int>& sets)
-	{
-		std::set<int> combined;
-		for (auto const& set : sets)
-		{
-			for (auto const& element : families[set])
-			{
-				combined.insert(element);
-			}
-		}
-
-		std::vector<int> total(combined.begin(), combined.end());
-		delete_elements(total);
-
-		auto max = universe.size() + 1;
-		for (auto const& element : total)
-		{
-			universe.erase(element);
-			int max_index = maxAddresses->at(element);
-			int min_index = minAddresses->at(element);
-
-			max_heap.increase_key(std::make_pair(element, max), max_index);
-			max_heap.extract_max();
-			min_heap.decrease_key(std::make_pair(element, -1), min_index);
-			min_heap.extract_min();
-		}
-	}
 
 	// TODO fix data structure maintenance
 	void include_common_elements()
@@ -438,6 +392,7 @@ public:
 
 	int include_unique_elements()
 	{
+		// find all the unique elements
 		std::vector<int> uniques;
 		auto pair = min_heap.peek_min();
 		while (pair.second == 1)
@@ -454,19 +409,12 @@ public:
 				break;
 			}
 		}
+
+		// find all distinct sets that cover all the unique elements
 		std::set<int> unique_sets;
 		for (auto const& x : uniques)
 		{
-			int j = 0;
-			for (auto const& set : adj[x])
-			{
-				if (!deleted_sets[set])
-				{
-					j = set;
-					break;
-				}
-			}
-			unique_sets.insert(j);
+			unique_sets.insert(adj[x][0]);
 		}
 
 		int count = unique_sets.size();
@@ -484,18 +432,19 @@ public:
 		}
 
 		std::vector<int> total(combined.begin(), combined.end());
-		delete_elements(total);
-
-		auto max = universe.size() + 1;
+		delete_elements(total); // also maintains count & adj & deleted
+		
+		// maintaining heaps
+		// we can remove all elements from total in max_heap
 		for (auto const& element : total)
 		{
 			universe.erase(element);
 			int max_index = maxAddresses->at(element);
-			max_heap.increase_key(std::make_pair(element, max), max_index);
+			max_heap.increase_key(std::make_pair(element, INT_MAX), max_index);
 			max_heap.extract_max();
-
 		}
 
+		// only a subset of total can be removed from min_heap
 		std::vector<int> undeleted(total.size() - uniques.size());
 		sort(uniques.begin(), uniques.end());
 		auto it = std::set_difference(total.begin(), total.end(), uniques.begin(), uniques.end(), undeleted.begin());

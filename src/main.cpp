@@ -50,6 +50,11 @@ int main()
 	auto duration = std::chrono::duration<double>(stop - start);
 	std::cout << "initializing = " << duration.count() << "s" << std::endl;
 
+	std::cout << std::endl;
+	std::cout << "original:" << std::endl;
+	std::cout << "|U| = " << instance.universe_size() << std::endl;
+	std::cout << "|F| = " << instance.families_size() << std::endl;
+
 	start = std::chrono::high_resolution_clock::now();
 	auto kernel = Reducer::reduce(instance);
 	stop = std::chrono::high_resolution_clock::now();
@@ -57,10 +62,12 @@ int main()
 
 	instance.clean_up();
 
+	std::cout << std::endl;
+	std::cout << "reduced:" << std::endl;
 	std::cout << "reduce time = " << duration.count() << "s" << std::endl;
 	std::cout << "|U| = " << instance.universe_size() << std::endl;
 	std::cout << "|F| = " << instance.families_size() << std::endl;
-	std::cout << "required = " << kernel.second << std::endl;
+	std::cout << "solution size lower bound = " << kernel.second << std::endl;
 	std::cout << std::endl;
 
 	return 0;

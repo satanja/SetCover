@@ -1,222 +1,517 @@
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <iterator>
 #include <set>
 #include <vector>
+#include <unordered_set>
+#include <map>
 
-#include "MinHeap.h"
 #include "MaxHeap.h"
+#include "MinHeap.h"
+
+class Instance {
+private:
+	std::set<int> universe;
+	std::vector<std::vector<int>> families;
+
+	// A min heap to find unique elements efficiently
+	MinHeap min_heap;
+
+	// A max heap to find trivial elements efficiently
+	MaxHeap max_heap;
+
+	// The addresses for the universe elements in the min heap
+	std::vector<int>* minAddresses;
+
+	// The addresses for the universe elements in the max heap
+	std::vector<int>* maxAddresses;
+
+	// index of the last initialized family in families
+	int last = -1;
+
+	// number of (to be) deleted sets
+	int deleted = 0;
+
+	// adjacency list from elements to their sets
+	std::vector<std::vector<int>> adj;
+
+	std::vector<int> count;
+
+	std::vector<bool> deleted_sets;
+
+	// ## Private Initialization ##
+	void set_universe_size(int size)
+	{
+		std::vector<std::pair<int, int>> min_vec(size);
+		minAddresses = new std::vector<int>;
+		maxAddresses = new std::vector<int>;
+		minAddresses->resize(size);
+		std::vector<std::pair<int, int>> max_vec(size);
+		maxAddresses->resize(size);
+
+		adj.resize(size);
+
+		for (int i = 0; i < size; i++)
+		{
+			universe.insert(i);
+			min_vec[i] = std::make_pair(i, 0);
+			minAddresses->at(i) = i;
+			max_vec[i] = std::make_pair(i, 0);
+			maxAddresses->at(i) = i;
+		}
+
+		count.resize(size);
+	}
+
+	// ## Callbacks ##
+
+	void update_index_min(int element, int index)
+	{
+		minAddresses->at(element) = index;
+	}
+
+	void update_index_max(int element, int index)
+	{
+		maxAddresses->at(element) = index;
+	}
+
+	// ## Evaluation ## 
+
+	// Returns the number of sets that contain all elements in query
+	std::vector<int> get_sets_by_list(std::vector<int> query)
+	{
+		auto compare_selectivity = [this](int element1, int element2) -> bool
+		{
+			if (count[element1] < count[element2])
+			{
+				return true;
+			}
+			else if (count[element1] == count[element2])
+			{
+				return element1 < element2;
+			}
+			return false;
+		};
+
+		sort(query.begin(), query.end(), compare_selectivity);
+		std::vector<int> result = select(query[0]);
+
+		int i = 1;
+		while (result.size() > 1 && i < query.size())
+		{
+			result = join(result, select(query[i]));
+			i++;
+		}
+		return result;
+	}
+
+	// Returns all the sets element is contained in
+	std::vector<int> select(int element)
+	{
+		std::vector<int> selection(adj[element].begin(), adj[element].end());
+		return selection;
+	}
+
+	// Returns the intersection of left and right
+	std::vector<int> join(std::vector<int>& left, std::vector<int>& right)
+	{
+		int size = std::max(left.size(), right.size());
+		std::vector<int> joined(size);
+
+		auto it = std::set_intersection(left.begin(), left.end(), right.begin(), right.end(), joined.begin());
+		joined.resize(it - joined.begin());
+
+		return joined;
+	}
+
+	// ## Data Structure Maintenance ## 
+
+	// removes set from adj[element] using a binary search
+	inline void remove_from_adj(int element, int set)
+	{
+		auto iter = std::lower_bound(adj[element].begin(), adj[element].end(), set);
+		adj[element].erase(iter);
+	}
+
+	// removes element from min_heap and max_heap 
+	void remove_from_heaps(int element)
+	{
+		min_heap.decrease_key(std::make_pair(element, -1), minAddresses->at(element));
+		min_heap.extract_min();
+		max_heap.increase_key(std::make_pair(element, INT_MAX), minAddresses->at(element));
+		max_heap.extract_max();
+	}
+
+	// decreases the occurence of element in the heaps by one
+	void decrease_heaps(int element)
+	{
+		int min_index = minAddresses->at(element);
+		auto min_state = min_heap[min_index];
+		min_heap.decrease_key(std::make_pair(min_state.first, min_state.second - 1), min_index);
+
+		int max_index = maxAddresses->at(element);
+		auto max_state = max_heap[max_index];
+		max_heap.decrease_key(std::make_pair(max_state.first, INT_MAX), std::make_pair(max_state.first, max_state.second - 1), max_index);
+	}
 
 
-#include <functional>
+	// decreases the count of the element by one
+	inline void update_count(int element)
+	{
+		count[element]--;
+	}
 
-#include <iostream>
-#include <algorithm>
-#include <iterator>
-
-class Instance
-{
+	// maintenance for removing a subset set
+	void subset_update(std::vector<int>& set, int index)
+	{
+		for (auto& element : set)
+		{
+			// element is present in 1 fewer set
+			update_count(element);
+			decrease_heaps(element);
+			remove_from_adj(element, index);
+		}
+	}
 public:
-    std::set<int> universe;
-    std::vector<std::vector<int>> families;
 
-    // A min heap to find unique elements efficiently
-    MinHeap min_heap;
+	// ## INITIALIZATION ##
+	Instance() {}
 
-    // A max heap to find trivial elements efficiently
-    // NB: trivial = present in every set, and at least 2 sets
-    MaxHeap max_heap;
+	// Resize the instance
+	void resize(int universe_size, int families_size)
+	{
+		set_universe_size(universe_size);
+		families.resize(families_size);
+		deleted_sets.resize(families_size, false);
+	}
 
-    // The addresses for the universe elements in the min heap
-    std::vector<int>* minAddresses;
+	// Add a new set to the instance
+	void add_family(std::vector<int> family)
+	{
+		last++;
+		families[last] = family;
+		for (int element : family)
+		{
+			count[element]++;
+			adj[element].push_back(last);
+		}
+	}
 
-    // The addresses for the universe elements in the max heap
-    std::vector<int>* maxAddresses;
+	// After processing all the sets, construct internal heaps
+	void initialize_heaps()
+	{
+		std::vector<std::pair<int, int>> min_vec(universe.size());
+		std::vector<std::pair<int, int>> max_vec(universe.size());
+		for (int i = 0; i < universe.size(); i++)
+		{
+			min_vec[i].first = i;
+			min_vec[i].second = count[i];
+			max_vec[i].first = i;
+			max_vec[i].second = count[i];
+		}
 
-    // index of the last initialized family in families
-    int last = -1;
+		using namespace std::placeholders;
+		min_heap = MinHeap(min_vec, std::bind(&Instance::update_index_min, this, _1, _2));
+		max_heap = MaxHeap(max_vec, std::bind(&Instance::update_index_max, this, _1, _2));
+	}
 
-    // adjacency list from elements to their sets
-    std::vector<std::vector<int>> adj;
+	// ## QUERIES ##
 
-    void set_universe_size(int size) {
-        std::vector<std::pair<int, int>> min_vec(size);
-        minAddresses = new std::vector<int>;
-        maxAddresses = new std::vector<int>;
-        minAddresses->resize(size);
-        std::vector<std::pair<int, int>> max_vec(size);
-        maxAddresses->resize(size);
+	int universe_size()
+	{
+		return universe.size();
+	}
 
-        adj.resize(size);
+	int families_size()
+	{
+		return families.size();
+	}
 
-        for (int i = 0; i < size; i++) {
-            universe.insert(i);
-            min_vec[i] = std::make_pair(i, 0);
-            minAddresses->at(i) = i;
-            max_vec[i] = std::make_pair(i, 0);
-            maxAddresses->at(i) = i;
-        }
+	// Returns whether there is an element in exactly one set
+	bool has_unique_element()
+	{
+		if (min_heap.size() == 0)
+			return false;
+		return min_heap.peek_min().second == 1;
+	}
 
-        using namespace std::placeholders;
-        min_heap = MinHeap(min_vec, std::bind(&Instance::update_index_min, this, _1, _2));
-        max_heap = MaxHeap(max_vec, std::bind(&Instance::update_index_max, this, _1, _2));
-    }
+	// Returns whether there is an element in every set (and at least two)
+	bool has_common_element()
+	{
+		if (max_heap.size() == 0)
+			return false;
+		return max_heap.peek_max().second >= families.size() - deleted;
+	}
 
-    void delete_set(int set) {
-        families.erase(families.begin() + set);
-    }
+	// Returns whether the instance is empty
+	bool is_empty()
+	{
+		return universe.size() == 0;
+	}
 
-    void delete_adj(int set) {
+	// queries and removes subsets directly
+	bool remove_equals()
+	{
+		bool result = false;
+		std::map<std::vector<int>, std::vector<int>> subsets;
+		for (int i = 0; i < families.size(); i++)
+		{
+			std::vector<int>& set = families[i];
+			if (set.size() == 0) continue;
+			if (subsets.count(set) > 0)
+			{
+				result = true;
+				subsets.at(set).push_back(i);
+			}
+			else
+			{
+				std::vector<int> subset = { i };
+				subsets.insert(std::make_pair(set, subset));
+			}
+		}
 
-    }
+		// remove all but one set
+		for (auto [key, list] : subsets)
+		{
+			for (int i = 0; i < list.size() - 1; i++)
+			{
+				int index = list[i];
+				subset_update(families[index], index);
+				families[index].resize(0);
+			}
+		}
 
-    void delete_heap(int set) {
-        for (auto const& x : families[set]) {
-            int min_addr = minAddresses->at(x);
-            int max_addr = maxAddresses->at(x);
+		return result;
+	}
 
-            min_heap.decrease_key(std::make_pair(x, -1), min_addr);
-            min_heap.extract_min();
+	bool remove_subsets()
+	{
+		std::vector<int> subsets;
+		bool result = false;
+		for (int i = 0; i < families.size(); i++)
+		{
+			std::vector<int>& set = families[i];
 
-            max_heap.increase_key(std::make_pair(x, universe.size() + 1), max_addr);
-            max_heap.extract_max();
+			if (set.size() == 0) continue;
+			auto candidates = get_sets_by_list(set);
+			if (candidates.size() > 1)
+			{
+				result = true;
+				subsets.push_back(i);
+			}
+		}
 
-            minAddresses->at(x) = -1;
-            maxAddresses->at(x) = -1;
-        }
-    }
+		// remove all (proper) subsets
+		for (auto i : subsets)
+		{
+			subset_update(families[i], i);
+			families[i].resize(0);
+		}
 
-    void delete_empty_adj() {
+		return result;
+	}
 
-    }
+	// ## REDUCTION OPERATIONS ## 
 
-    void delete_empty_families() {
+	void delete_elements(std::vector<int>& total)
+	{
+		for (int i = 0; i < families.size(); i++)
+		{
+			std::vector<int> new_set(families[i].size());
+			std::vector<int> family = families[i];
+			auto it = std::set_difference(family.begin(),
+										  family.end(),
+										  total.begin(),
+										  total.end(),
+										  new_set.begin());
+			new_set.resize(it - new_set.begin());
+			families[i] = new_set;
+		}
+	}
 
-        std::vector<std::vector<int>> new_families;
-        for (auto& set : families) {
-            if (set.size() > 0)
-            {
-                new_families.push_back(set);
-            }
-        }
-        families = new_families;
-    }
+	void delete_heap(int set)
+	{
+		for (auto const& x : families[set])
+		{
+			int min_addr = minAddresses->at(x);
+			int max_addr = maxAddresses->at(x);
 
-    void include_set(int set) {
-        for (int i = 0; i < families.size(); i++) {
-            if (i == set) continue;
-            for (auto const& x : families[set]) {
-                auto ptr = std::find(families[i].begin(), families[i].end(), x);
-                families[i].erase(ptr);
-            }
-        }
+			min_heap.decrease_key(std::make_pair(x, -1), min_addr);
+			min_heap.extract_min();
 
+			max_heap.increase_key(std::make_pair(x, universe.size() + 1), max_addr);
+			max_heap.extract_max();
 
-        // clean up all references to the set
-        delete_adj(set);
-        delete_empty_adj();
-        delete_heap(set);
+			minAddresses->at(x) = -1;
+			maxAddresses->at(x) = -1;
+		}
+	}
 
-        // possible to clean up the set itself
-        for (auto const& x : families[set]) {
-            universe.erase(x);
-        }
+	void delete_empty_families()
+	{
+		std::vector<std::vector<int>> new_families;
+		for (auto& set : families)
+		{
+			if (set.size() > 0)
+			{
+				new_families.push_back(set);
+			}
+		}
+		families = new_families;
+	}
 
-        delete_set(set);
-        delete_empty_families();
-    }
+	void include_set(std::vector<int>& set)
+	{
+		delete_elements(set);
+		auto max = universe.size() + 1;
+		for (auto const& element : set)
+		{
+			universe.erase(element);
+			int max_index = maxAddresses->at(element);
+			int min_index = minAddresses->at(element);
 
-    void include_sets(std::vector<int>& sets) {
-        std::set<int> combined;
-        for (auto const& set : sets) {
-            for (auto const& element : families[set]) {
-                combined.insert(element);
-            }
-        }
+			max_heap.increase_key(std::make_pair(element, max), max_index);
+			max_heap.extract_max();
+			min_heap.decrease_key(std::make_pair(element, -1), min_index);
+			min_heap.extract_min();
+		}
+	}
 
-        std::vector<int> total(combined.begin(), combined.end());
+	void include_sets(std::vector<int>& sets)
+	{
+		std::set<int> combined;
+		for (auto const& set : sets)
+		{
+			for (auto const& element : families[set])
+			{
+				combined.insert(element);
+			}
+		}
 
-        int j = 0;
-        for (int i = 0; i < families.size(); i++) {
-            std::vector<int> new_set(families[i].size());
-            std::vector<int> family = families[i];
-            auto it = std::set_difference(family.begin(), family.end(), total.begin(), total.end(), new_set.begin());
-            new_set.resize(it - new_set.begin());
-            families[i] = new_set;
-        }
+		std::vector<int> total(combined.begin(), combined.end());
+		delete_elements(total);
 
-        auto max = universe.size() + 1;
-        for (auto const& element : combined) {
-            universe.erase(element);
-            int index = maxAddresses->at(element);
-            max_heap.increase_key(std::make_pair(element, max), index);
-            max_heap.extract_max();
-        }
-    }
+		auto max = universe.size() + 1;
+		for (auto const& element : total)
+		{
+			universe.erase(element);
+			int max_index = maxAddresses->at(element);
+			int min_index = minAddresses->at(element);
 
-public:
+			max_heap.increase_key(std::make_pair(element, max), max_index);
+			max_heap.extract_max();
+			min_heap.decrease_key(std::make_pair(element, -1), min_index);
+			min_heap.extract_min();
+		}
+	}
 
-    void update_index_min(int element, int index) {
-        minAddresses->at(element) = index;
-    }
+	// TODO fix data structure maintenance
+	void include_common_elements()
+	{
+		std::vector<int> commons;
+		auto pair = max_heap.peek_max();
 
-    void update_index_max(int element, int index) {
-        maxAddresses->at(element) = index;
-    }
+		while (pair.second >= families.size() - deleted)
+		{
+			commons.push_back(pair.first);
+			max_heap.extract_max();
 
-    Instance() {
+			int element = pair.first;
+			min_heap.decrease_key(std::make_pair(element, -1),
+								  minAddresses->at(element));
+			min_heap.extract_min();
 
-    }
+			if (max_heap.size() > 0)
+			{
+				pair = max_heap.peek_max();
+			}
+			else
+			{
+				break;
+			}
+		}
 
-    void resize(int universe_size, int families_size) {
-        set_universe_size(universe_size);
-        families.resize(families_size);
-    }
+		sort(commons.begin(), commons.end());
+		delete_elements(commons);
+	}
 
-    void add_family(std::vector<int> family) {
-        last++;
-        families[last] = family;
-        for (int element : family) {
+	int include_unique_elements()
+	{
+		std::vector<int> uniques;
+		auto pair = min_heap.peek_min();
+		while (pair.second == 1)
+		{
+			uniques.push_back(pair.first);
+			min_heap.extract_min();
 
-            int min_addr = minAddresses->at(element);
-            const std::pair<int, int> state = min_heap[min_addr];
-            min_heap.increase_key(std::make_pair(element, -1), std::make_pair(element, state.second + 1), min_addr);
+			if (min_heap.size() > 0)
+			{
+				pair = min_heap.peek_min();
+			}
+			else
+			{
+				break;
+			}
+		}
+		std::set<int> unique_sets;
+		for (auto const& x : uniques)
+		{
+			int j = 0;
+			for (auto const& set : adj[x])
+			{
+				if (!deleted_sets[set])
+				{
+					j = set;
+					break;
+				}
+			}
+			unique_sets.insert(j);
+		}
 
-            int max_addr = maxAddresses->at(element);
-            max_heap.increase_key(std::make_pair(element, state.second + 1), max_addr);
-            
-            adj[element].push_back(last);
-        }
-    }
+		int count = unique_sets.size();
 
-    bool has_unique_element() {
-        return min_heap.peek_min().second == 1;
-    }
+		std::vector<int> result(unique_sets.begin(), unique_sets.end());
+		deleted += result.size();
 
-    bool has_common_element() {
-        return max_heap.peek_max().second == families.size();
-    }
+		std::set<int> combined;
+		for (auto const& set : result)
+		{
+			for (auto const& element : families[set])
+			{
+				combined.insert(element);
+			}
+		}
 
-    int include_unique_element() {
-        std::vector<int> uniques;
-        auto pair = min_heap.peek_min();
-        while (pair.second == 1) {
-            uniques.push_back(pair.first);
-            min_heap.extract_min();
-            pair = min_heap.peek_min();
-        }
-        std::set<int> unique_sets;
-        for (auto const& x : uniques) {
-            unique_sets.insert(adj[x][0]);
-        }
+		std::vector<int> total(combined.begin(), combined.end());
+		delete_elements(total);
 
-        int count = unique_sets.size();
-        std::vector<int> result(unique_sets.begin(), unique_sets.end());
-        include_sets(result);
-        return count;
-    }
+		auto max = universe.size() + 1;
+		for (auto const& element : total)
+		{
+			universe.erase(element);
+			int max_index = maxAddresses->at(element);
+			max_heap.increase_key(std::make_pair(element, max), max_index);
+			max_heap.extract_max();
 
-    void clean_up() {
-        delete_empty_families();
-        delete minAddresses;
-        delete maxAddresses;
-    }
+		}
+
+		std::vector<int> undeleted(total.size() - uniques.size());
+		sort(uniques.begin(), uniques.end());
+		auto it = std::set_difference(total.begin(), total.end(), uniques.begin(), uniques.end(), undeleted.begin());
+
+		for (auto const& element : undeleted)
+		{
+			int min_index = minAddresses->at(element);
+			min_heap.decrease_key(std::make_pair(element, -1), min_index);
+			min_heap.extract_min();
+		}
+
+		return count;
+	}
+
+	void clean_up()
+	{
+		delete_empty_families();
+	}
 };
-

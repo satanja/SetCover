@@ -81,6 +81,15 @@ int main(int argc, char* argv[])
 		std::vector<int> solution = Solver::greedy_reduce_solve(instance);
 		std::cout << "solution size = " << solution.size() << std::endl;
 		std::cout << "is valid = " << Verifyer::is_valid(copy, solution) << std::endl;
+
+		std::ofstream output;
+		output.open(file + "-solution.txt");
+		output << solution.size() << std::endl;
+		for (auto set : solution) 
+		{
+			output << set << std::endl;
+		}
+		output.close();
 	}
 	return 0;
 }

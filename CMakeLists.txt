@@ -9,7 +9,10 @@ include_directories(include)
 set(HEADERS
     include/Instance.h
     include/Reducer.h
- "include/MinHeap.h" "include/MaxHeap.h" "include/PairCompartor.h" "include/Solver.h")
+    include/MinHeap.h
+    include/MaxHeap.h
+    include/PairCompartor.h
+    include/Solver.h)
 
 set(SOURCES
     src/Reducer.cpp

@@ -8,6 +8,6 @@
 class Reducer
 {
 public:
-	static std::pair<Instance, int> reduce(Instance& instance);
-	static std::pair<Instance, int> copy_reduce(Instance instance);
+	static std::pair<Instance, std::vector<int>> reduce(Instance& instance);
+	static std::pair<Instance, std::vector<int>> copy_reduce(Instance instance);
 };

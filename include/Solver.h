@@ -28,19 +28,20 @@ public:
 	//	return size;
 	//}
 
-	static int greedy_reduce_solve(Instance instance)
+	static std::vector<int> greedy_reduce_solve(Instance instance)
 	{
-		int size = 0;
+		std::vector<int> solution;
 		while (!instance.is_empty())
 		{
-			size += Reducer::reduce(instance).second;
+			std::vector<int> X = Reducer::reduce(instance).second;
+			solution.insert(solution.end(), X.begin(), X.end());
 			if (!instance.is_empty())
 			{
 				int largest = instance.get_largest_set();
 				instance.include_set(largest);
-				size++;
+				solution.push_back(largest);
 			}
 		}
-		return size;
+		return solution;
 	}
 };

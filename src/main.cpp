@@ -1,5 +1,6 @@
 #include "Reducer.h"
 #include "Solver.h"
+#include "Verifyer.h"
 
 #include <list>
 #include <iostream>
@@ -72,12 +73,14 @@ int main(int argc, char* argv[])
 		std::cout << "reduce time = " << duration.count() << "s" << std::endl;
 		std::cout << "|U| = " << instance.universe_size() << std::endl;
 		std::cout << "|F| = " << instance.families_size() << std::endl;
-		std::cout << "solution size lower bound = " << kernel.second << std::endl;
+		std::cout << "solution size lower bound = " << kernel.second.size() << std::endl;
 	}
 	else if (*argv[1] == '1')
 	{
-		int k = Solver::greedy_reduce_solve(instance);
-		std::cout << "solution size = " << k << std::endl;
+		Instance copy(instance);
+		std::vector<int> solution = Solver::greedy_reduce_solve(instance);
+		std::cout << "solution size = " << solution.size() << std::endl;
+		std::cout << "is valid = " << Verifyer::is_valid(copy, solution) << std::endl;
 	}
 	return 0;
 }

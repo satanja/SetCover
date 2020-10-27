@@ -10,6 +10,7 @@
 #include "MaxHeap.h"
 #include "MinHeap.h"
 
+#pragma once
 class Instance {
 private:
 	std::set<int> universe;
@@ -276,6 +277,18 @@ public:
 		return families.size();
 	}
 
+	// returns a set
+	std::vector<int> get_set(int i)
+	{
+		return families[i];
+	}
+
+	// returns the universe
+	std::set<int> get_universe()
+	{
+		return universe;
+	}
+
 	// Returns whether there is an element in exactly one set
 	bool has_unique_element()
 	{
@@ -405,7 +418,7 @@ public:
 		delete_elements(commons);
 	}
 
-	int include_unique_elements()
+	std::vector<int> include_unique_elements()
 	{
 		// find all the unique elements
 		std::vector<int> uniques;
@@ -431,8 +444,6 @@ public:
 		{
 			unique_sets.insert(adj[x][0]);
 		}
-
-		int count = unique_sets.size();
 
 		std::vector<int> result(unique_sets.begin(), unique_sets.end());
 		deleted += result.size();
@@ -471,7 +482,7 @@ public:
 			min_heap.extract_min();
 		}
 
-		return count;
+		return result;
 	}
 
 	// ## Solver stuff ##

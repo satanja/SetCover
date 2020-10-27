@@ -4,9 +4,9 @@
 #include <iterator>
 #include <iostream>
 
-std::pair<Instance, int> Reducer::reduce(Instance& instance)
+std::pair<Instance, std::vector<int>> Reducer::reduce(Instance& instance)
 {
-	int k = 0;
+	std::vector<int> k;
 	bool reduced = false;
 	do
 	{
@@ -15,8 +15,8 @@ std::pair<Instance, int> Reducer::reduce(Instance& instance)
 		bool unique = instance.has_unique_element();
 		if (unique)
 		{
-			int d = instance.include_unique_elements();
-			k += d;
+			std::vector<int> d = instance.include_unique_elements();
+			k.insert(k.end(), d.begin(), d.end());
 			reduced = true;
 			continue;
 		}
@@ -59,7 +59,7 @@ std::pair<Instance, int> Reducer::reduce(Instance& instance)
 	return std::make_pair(instance, k);
 }
 
-std::pair<Instance, int> Reducer::copy_reduce(Instance instance)
+std::pair<Instance, std::vector<int>> Reducer::copy_reduce(Instance instance)
 {
 	return reduce(instance);
 }

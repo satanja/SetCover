@@ -4,6 +4,7 @@
 #include <list>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <string>
 
 #include "MinHeap.h"
@@ -12,20 +13,21 @@
 
 #include <chrono>
 
-void read(Instance& instance)
+void read(Instance& instance, const std::string& file)
 {
+	std::ifstream input { file };
 	int u;
-	std::cin >> u;
+	input >> u;
 	int fs;
-	std::cin >> fs;
+	input >> fs;
 	instance.resize(u, fs);
 
 	std::string str;
-	getline(std::cin, str);
+	getline(input, str);
 
 	for (int i = 0; i < fs; i++)
 	{
-		getline(std::cin, str);
+		getline(input, str);
 		std::istringstream ss(str);
 		std::vector<int> family;
 		while (!ss.eof())
@@ -39,14 +41,19 @@ void read(Instance& instance)
 	instance.initialize_heaps();
 }
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
+	std::string file{ argv[2] };
+
 	Instance instance;
-	read(instance);
-	
-	if (argv[0] == 0)
+	auto start = std::chrono::high_resolution_clock::now();
+	read(instance, file);
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration<double>(stop - start);
+
+	if (*argv[1] == '0')
 	{
-		std::cout << "initializing = " << duration.count() << "s" << std::endl;
+		std::cout << "initialize time = " << duration.count() << "s" << std::endl;
 
 		std::cout << std::endl;
 		std::cout << "original:" << std::endl;
@@ -67,7 +74,7 @@ int main(int argc, char** argv)
 		std::cout << "|F| = " << instance.families_size() << std::endl;
 		std::cout << "solution size lower bound = " << kernel.second << std::endl;
 	}
-	else if (argv[0] == 1)
+	else if (*argv[1] == '1')
 	{
 		int k = Solver::greedy_reduce_solve(instance);
 		std::cout << "solution size = " << k << std::endl;

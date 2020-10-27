@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #pragma once
-class Verifyer
+class Verifier
 {
 public:
     static bool is_valid(Instance& instance, std::vector<int> solution)

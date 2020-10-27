@@ -1,6 +1,6 @@
 #include "Reducer.h"
 #include "Solver.h"
-#include "Verifyer.h"
+#include "Verifier.h"
 
 #include <list>
 #include <iostream>
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 		Instance copy(instance);
 		std::vector<int> solution = Solver::greedy_reduce_solve(instance);
 		std::cout << "solution size = " << solution.size() << std::endl;
-		std::cout << "is valid = " << Verifyer::is_valid(copy, solution) << std::endl;
+		std::cout << "is valid = " << Verifier::is_valid(copy, solution) << std::endl;
 
 		std::ofstream output;
 		output.open(file + "-solution.txt");

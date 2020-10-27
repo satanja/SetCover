@@ -358,6 +358,21 @@ public:
 		return result;
 	}
 
+	int get_largest_set()
+	{
+		int largest = 0;
+		int index = 0;
+		for (int i = 0; i < families.size(); i++)
+		{
+			if (families[i].size() > largest)
+			{
+				largest = families[i].size();
+				index = i;
+			}
+		}
+		return index;
+	}
+
 	// ## REDUCTION OPERATIONS ## 
 
 	// TODO fix data structure maintenance
@@ -458,6 +473,20 @@ public:
 
 		return count;
 	}
+
+	// ## Solver stuff ##
+	void include_set(int i)
+	{
+		std::vector<int> total = families[i];
+		for (int element : total)
+		{
+			universe.erase(element);
+			remove_from_heaps(element);
+		}
+		delete_elements(total);
+	}
+
+	// ## Finalization ##
 
 	void clean_up()
 	{

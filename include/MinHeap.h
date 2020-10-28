@@ -3,6 +3,12 @@
 #include <functional>
 
 #pragma once
+/**
+ * A typical min heap, with pairs prioritized by their value. 
+ * The value represents how often a key is contained in a set in an instance.
+ * Using a callback whenever two elements are swapped in the heap, we can
+ * maintain an index where each element resides in the heap.
+ */
 class MinHeap
 {
 private:

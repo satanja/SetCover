@@ -28,24 +28,28 @@ private:
 	// The addresses for the universe elements in the max heap
 	std::vector<int>* maxAddresses;
 
-	// index of the last initialized family in families
+	// Index of the last initialized family in families
 	int last = -1;
 
-	// number of (to be) deleted sets
+	// Number of current empty sets
 	int deleted = 0;
 
-	// adjacency list from elements to their sets
+	// Adjacency list from elements to their sets
 	std::vector<std::vector<int>> adj;
 
+	// Synopsis that contains the number of sets an element is contained in
 	std::vector<int> count;
 
 	// ## Private Initialization ##
 	void set_universe_size(int size)
 	{
-		std::vector<std::pair<int, int>> min_vec(size);
+
 		minAddresses = new std::vector<int>;
 		maxAddresses = new std::vector<int>;
 		minAddresses->resize(size);
+
+		// First complete the underlyig vectors for the heaps before construction
+		std::vector<std::pair<int, int>> min_vec(size);
 		std::vector<std::pair<int, int>> max_vec(size);
 		maxAddresses->resize(size);
 

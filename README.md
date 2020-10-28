@@ -15,5 +15,15 @@ Alternatively, CMake can be installed with Visual Studio. Microsoft has given th
 TODO.
 
 ## Usage
+
+### Input Specification
+The tool requires inputs to have the following specification. 
+* The first line contains an integer `n` with the number of elements in the universe
+* The second line contains an integer `m` with the number of sets
+* The next `1 <= k <= m` lines contain the elements of set `k` in ascending order separated by spaces, but with no space after the last element, followed by a newline `\n`.
+
+*The tool has undefined behavior in case there is a space followed after the last element of each set*.
+
+### Running the tool
 Copy the binary to `inputs/`, and in command prompt (or a terminal) use `setcover [mode] [input]`.
 Here, `[mode]` is either `0` or `1` for reducing the input once or using the greedy reduce algorithm on the instance respectively, and [input] is the selected input, e.g., `chess.dat`. Note that when the greedy reduce algorithm is invoked, a solution will be written with the name `[input]-solution.txt`.

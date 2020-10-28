@@ -348,7 +348,8 @@ public:
 
 	bool remove_subsets()
 	{
-		std::vector<int> subsets;
+		std::vector<int> subsets(families.size());
+		int j = 0;
 		bool result = false;
 		for (int i = 0; i < families.size(); i++)
 		{
@@ -359,9 +360,10 @@ public:
 			if (candidates.size() > 1)
 			{
 				result = true;
-				subsets.push_back(i);
+				subsets[j++] = i;
 			}
 		}
+		subsets.resize(j);
 
 		// remove all (proper) subsets
 		std::unordered_set<int> updated_elements;
@@ -427,11 +429,12 @@ public:
 	std::vector<int> include_unique_elements()
 	{
 		// find all the unique elements
-		std::vector<int> uniques;
+		std::vector<int> uniques(universe.size());
 		auto pair = min_heap.peek_min();
+		int j = 0;
 		while (pair.second == 1)
 		{
-			uniques.push_back(pair.first);
+			uniques[j++] = pair.first;
 			min_heap.extract_min();
 
 			if (min_heap.size() > 0)
@@ -443,6 +446,7 @@ public:
 				break;
 			}
 		}
+		uniques.resize(j);
 
 		// find all distinct sets that cover all the unique elements
 		std::set<int> unique_sets;
@@ -454,6 +458,7 @@ public:
 		std::vector<int> result(unique_sets.begin(), unique_sets.end());
 		deleted += result.size();
 
+		// must be a balanced BST s.t. total is eventually sorted.
 		std::set<int> combined;
 		for (auto const& set : result)
 		{

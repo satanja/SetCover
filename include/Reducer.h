@@ -11,7 +11,7 @@
 class Reducer
 {
 public:
-	std::pair<Instance, std::vector<int>> Reducer::reduce(Instance& instance)
+	static std::pair<Instance, std::vector<int>> Reducer::reduce(Instance& instance)
 	{
 		std::vector<int> k;
 		bool reduced = false;
@@ -44,7 +44,7 @@ public:
 		return std::make_pair(instance, k);
 	}
 
-	std::pair<Instance, std::vector<int>> Reducer::copy_reduce(Instance instance)
+	static std::pair<Instance, std::vector<int>> Reducer::copy_reduce(Instance instance)
 	{
 		return reduce(instance);
 	}

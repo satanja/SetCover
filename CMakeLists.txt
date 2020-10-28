@@ -11,7 +11,6 @@ set(HEADERS
     include/Reducer.h
     include/MinHeap.h
     include/MaxHeap.h
-    include/PairCompartor.h
     include/Solver.h)
 
 set(SOURCES

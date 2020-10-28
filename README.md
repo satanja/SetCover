@@ -18,9 +18,9 @@ TODO.
 
 ### Input Specification
 The tool requires inputs to have the following specification. 
-* The first line contains an integer `n` with the number of elements in the universe
-* The second line contains an integer `m` with the number of sets
-* The next `1 <= k <= m` lines contain the elements of set `k` in ascending order separated by spaces, but with no space after the last element, followed by a newline `\n`.
+* The first line contains an integer `n` with the number of elements in the universe numbered from `0` to `n - 1`.
+* The second line contains an integer `m` with the number of sets.
+* The next `1 <= k <= m` lines contain the elements of set `k` in ascending order separated by spaces, but with no space after the last element.
 
 *The tool has undefined behavior in case there is a space followed after the last element of each set*.
 

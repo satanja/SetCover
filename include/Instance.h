@@ -39,8 +39,6 @@ private:
 
 	std::vector<int> count;
 
-	std::vector<bool> deleted_sets;
-
 	// ## Private Initialization ##
 	void set_universe_size(int size)
 	{
@@ -66,7 +64,8 @@ private:
 	}
 
 	// ## Callbacks ##
-
+	// Methods used to keep track of the index of each element in the heaps 
+	// for decrease_key / increase_key operations
 	void update_index_min(int element, int index)
 	{
 		minAddresses->at(element) = index;
@@ -110,8 +109,7 @@ private:
 	// Returns all the sets element is contained in
 	std::vector<int> select(int element)
 	{
-		std::vector<int> selection(adj[element].begin(), adj[element].end());
-		return selection;
+		return adj[element];
 	}
 
 	// Returns the intersection of left and right
@@ -231,7 +229,6 @@ public:
 	{
 		set_universe_size(universe_size);
 		families.resize(families_size);
-		deleted_sets.resize(families_size, false);
 	}
 
 	// Add a new set to the instance

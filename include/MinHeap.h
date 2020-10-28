@@ -3,6 +3,8 @@
 #include <functional>
 
 #pragma once
+#pragma warning (disable : 4267 )
+
 /**
  * A typical min heap, with pairs prioritized by their value. 
  * The value represents how often a key is contained in a set in an instance.

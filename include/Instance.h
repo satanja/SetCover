@@ -119,7 +119,7 @@ private:
 	// Returns the intersection of left and right
 	std::vector<int> join(std::vector<int>& left, std::vector<int>& right)
 	{
-		int size = std::max(left.size(), right.size());
+		size_t size = std::max(left.size(), right.size());
 		std::vector<int> joined(size);
 
 		auto it = std::set_intersection(left.begin(), left.end(), right.begin(), right.end(), joined.begin());
@@ -267,12 +267,12 @@ public:
 
 	// ## QUERIES ##
 
-	int universe_size()
+	size_t universe_size()
 	{
 		return universe.size();
 	}
 
-	int families_size()
+	size_t families_size()
 	{
 		return families.size();
 	}
@@ -387,11 +387,11 @@ public:
 	{
 		int largest = 0;
 		int index = 0;
-		for (int i = 0; i < families.size(); i++)
+		for (uint32_t i = 0; i < families.size(); i++)
 		{
 			if (families[i].size() > largest)
 			{
-				largest = families[i].size();
+				largest = (int) families[i].size();
 				index = i;
 			}
 		}
@@ -460,7 +460,7 @@ public:
 		}
 
 		std::vector<int> result(unique_sets.begin(), unique_sets.end());
-		deleted += result.size();
+		deleted += (int) result.size();
 
 		// must be a balanced BST s.t. total is eventually sorted.
 		std::set<int> combined;

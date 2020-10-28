@@ -3,6 +3,7 @@
 #include <functional>
 
 #pragma once
+#pragma warning (disable : 4267 )
 
 /**
  * A typical max heap, with pairs prioritized by their value. 

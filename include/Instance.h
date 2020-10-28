@@ -144,16 +144,14 @@ private:
 		max_heap.extract_max();
 	}
 
-	// decreases the occurence of element in the heaps by one
+	// decreases the occurence of element in the heaps to its actual count
 	void decrease_heaps(int element)
 	{
 		int min_index = minAddresses->at(element);
-		auto min_state = min_heap[min_index];
-		min_heap.decrease_key(std::make_pair(min_state.first, min_state.second - 1), min_index);
+		min_heap.decrease_key(std::make_pair(element, count[element]), min_index);
 
 		int max_index = maxAddresses->at(element);
-		auto max_state = max_heap[max_index];
-		max_heap.decrease_key(std::make_pair(max_state.first, INT_MAX), std::make_pair(max_state.first, max_state.second - 1), max_index);
+		max_heap.decrease_key(std::make_pair(element, INT_MAX), std::make_pair(element, count[element]), max_index);
 	}
 
 
@@ -164,14 +162,15 @@ private:
 	}
 
 	// maintenance for removing a subset set
-	void subset_update(std::vector<int>& set, int index)
+	void subset_update(std::vector<int>& set, int index, std::unordered_set<int>& out_elements)
 	{
 		for (auto& element : set)
 		{
 			// element is present in 1 fewer set
 			update_count(element);
-			decrease_heaps(element);
 			remove_from_adj(element, index);
+
+			out_elements.insert(element);
 		}
 		families[index].resize(0);
 		deleted++;
@@ -333,13 +332,18 @@ public:
 		}
 
 		// remove all but one set
+		std::unordered_set<int> updated_elements;
 		for (auto [key, list] : subsets)
 		{
 			for (int i = 0; i < list.size() - 1; i++)
 			{
 				int index = list[i];
-				subset_update(families[index], index);
+				subset_update(families[index], index, updated_elements);
 			}
+		}
+		for (auto element : updated_elements)
+		{
+			decrease_heaps(element);
 		}
 
 		return result;
@@ -363,9 +367,14 @@ public:
 		}
 
 		// remove all (proper) subsets
+		std::unordered_set<int> updated_elements;
 		for (auto i : subsets)
 		{
-			subset_update(families[i], i);
+			subset_update(families[i], i, updated_elements);
+		}
+		for (auto element : updated_elements)
+		{
+			decrease_heaps(element);
 		}
 
 		return result;

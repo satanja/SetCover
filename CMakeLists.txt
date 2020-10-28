@@ -15,7 +15,6 @@ set(HEADERS
     include/Solver.h)
 
 set(SOURCES
-    src/Reducer.cpp
     src/main.cpp
  )
 

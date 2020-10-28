@@ -211,14 +211,16 @@ private:
 	// ## Finalization ##
 	void delete_empty_families()
 	{
-		std::vector<std::vector<int>> new_families;
+		std::vector<std::vector<int>> new_families(families.size());
+		int j = 0;
 		for (auto& set : families)
 		{
 			if (set.size() > 0)
 			{
-				new_families.push_back(set);
+				new_families[j++] = set;
 			}
 		}
+		new_families.resize(j);
 		families = new_families;
 	}
 

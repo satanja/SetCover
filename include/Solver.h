@@ -1,5 +1,5 @@
 #include "Reducer.h"
-#include <iostream>
+
 #pragma once
 class Solver
 {

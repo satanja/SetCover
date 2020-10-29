@@ -3,7 +3,7 @@ This project reduces Set Cover instances using two simple reductions, namely
 1. include sets with a unique element,
 1. discard sets that are a subset of another set.
 
-Given the reduction subroutine, we can also improve the simple greedy algorithm. We only make greedy choices when absolutely necessary, i.e., we can no longer reduce the instance. After making a greedy choice, we reduce the new instance again. This approach to the greedy algorithm maintains the O(log n) approximation bound, but often yields better solution sizes.
+Given the reduction subroutine, we can also improve the simple greedy algorithm. We only make greedy choices when absolutely necessary, i.e., when we can no longer reduce the instance. After making a greedy choice, we reduce the new instance again. This approach to the greedy algorithm maintains the O(log n) approximation bound, but often yields better solution sizes.
 
 The performance of the tool is rather decent, we can expect to reduce over 300 thousand sets in a couple of minutes.
 

@@ -54,12 +54,12 @@ int main(int argc, char* argv[])
 
 	if (*argv[1] == '0')
 	{
-		std::cout << "initialize time = " << duration.count() << "s" << std::endl;
+		std::cout << "initialize time = " << duration.count() << "s" << "\n";
 
-		std::cout << std::endl;
-		std::cout << "original:" << std::endl;
-		std::cout << "|U| = " << instance.universe_size() << std::endl;
-		std::cout << "|F| = " << instance.families_size() << std::endl;
+		std::cout << "\n";
+		std::cout << "original:" << "\n";
+		std::cout << "|U| = " << instance.universe_size() << "\n";
+		std::cout << "|F| = " << instance.families_size() << "\n";
 
 		start = std::chrono::high_resolution_clock::now();
 		auto kernel = Reducer::reduce(instance);
@@ -68,26 +68,26 @@ int main(int argc, char* argv[])
 
 		instance.clean_up();
 
-		std::cout << std::endl;
-		std::cout << "reduced:" << std::endl;
-		std::cout << "reduce time = " << duration.count() << "s" << std::endl;
-		std::cout << "|U| = " << instance.universe_size() << std::endl;
-		std::cout << "|F| = " << instance.families_size() << std::endl;
-		std::cout << "solution size lower bound = " << kernel.second.size() << std::endl;
+		std::cout << "\n";
+		std::cout << "reduced:" << "\n";
+		std::cout << "reduce time = " << duration.count() << "s" << "\n";
+		std::cout << "|U| = " << instance.universe_size() << "\n";
+		std::cout << "|F| = " << instance.families_size() << "\n";
+		std::cout << "solution size lower bound = " << kernel.second.size() << "\n";
 	}
 	else if (*argv[1] == '1')
 	{
 		Instance copy(instance);
 		std::vector<int> solution = Solver::greedy_reduce_solve(instance);
-		std::cout << "solution size = " << solution.size() << std::endl;
-		std::cout << "is valid = " << Verifier::is_valid(copy, solution) << std::endl;
+		std::cout << "solution size = " << solution.size() << "\n";
+		std::cout << "is valid = " << Verifier::is_valid(copy, solution) << "\n";
 
 		std::ofstream output;
 		output.open(file + "-solution.txt");
-		output << solution.size() << std::endl;
+		output << solution.size() << "\n";
 		for (auto set : solution) 
 		{
-			output << set << std::endl;
+			output << set << "\n";
 		}
 		output.close();
 	}

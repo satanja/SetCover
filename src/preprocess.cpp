@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <set>
+#include <vector>
 
 int main()
 {
@@ -21,12 +23,26 @@ int main()
 
         getline(std::cin, str);
         std::istringstream ss(str);
+
+        std::set<int> sorted_set;
         while (!ss.eof())
         {
             int x;
             ss >> x;
-            std::cout << x - 1 << " ";
+            sorted_set.insert(x - 1);
         }
-		std::cout << "\n";
+
+        std::vector<int> sorted(sorted_set.begin(), sorted_set.end());
+        for (int i = 0; i < sorted.size(); i++)
+        {
+            if (i != sorted.size() - 1)
+            {
+                std::cout << sorted[i] << " ";
+            }
+            else 
+            {
+                std::cout << sorted[i] << "\n";
+            }
+        }
     }
 }

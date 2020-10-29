@@ -18,3 +18,4 @@ set(SOURCES
  )
 
 add_executable(setcover ${SOURCES} ${HEADERS})
+add_executable(preprocessor src/preprocess.cpp)

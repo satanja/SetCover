@@ -5,7 +5,7 @@ This project reduces Set Cover instances using two simple reductions, namely
 
 Given the reduction subroutine, we can also improve the simple greedy algorithm. We only make greedy choices when absolutely necessary, i.e., when we can no longer reduce the instance. After making a greedy choice, we reduce the new instance again. This approach to the greedy algorithm maintains the O(log n) approximation bound, but often yields better solution sizes.
 
-The performance of the tool is rather decent, we can expect to reduce over 300 thousand sets in a couple of minutes.
+In terms of running time, it is safe to say that the tool is fast. Instances with over 990k sets can be reduced in a couple of seconds. The greedy algorithm has a similar runtime.
 
 ## Requirements
 This project uses CMake and the C++20 STL. CMake can be downloaded [here](https://cmake.org/download/]).

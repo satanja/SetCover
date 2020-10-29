@@ -47,10 +47,6 @@ private:
 		minAddresses = new std::vector<int>;
 		maxAddresses = new std::vector<int>;
 		minAddresses->resize(size);
-
-		// First complete the underlyig vectors for the heaps before construction
-		std::vector<std::pair<int, int>> min_vec(size);
-		std::vector<std::pair<int, int>> max_vec(size);
 		maxAddresses->resize(size);
 
 		adj.resize(size);
@@ -58,9 +54,7 @@ private:
 		for (int i = 0; i < size; i++)
 		{
 			universe.insert(i);
-			min_vec[i] = std::make_pair(i, 0);
 			minAddresses->at(i) = i;
-			max_vec[i] = std::make_pair(i, 0);
 			maxAddresses->at(i) = i;
 		}
 

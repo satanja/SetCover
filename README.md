@@ -23,4 +23,4 @@ The tool requires inputs to have the following specification.
 
 ### Running the tool
 Copy the binary to `inputs/`, and in command prompt (or a terminal) use `setcover [mode] [input]`.
-Here, `[mode]` is either `0` or `1` for reducing the input once or using the greedy reduce algorithm on the instance respectively, and `[input]` is the selected input, e.g., `chess.dat`. Note that when the greedy reduce algorithm is invoked, a solution will be written with the name `[input]-solution.txt`.
+Here, `[mode]` is either `0` or `1` for reducing the input once or using the greedy reduce algorithm on the instance respectively, and `[input]` is the selected input. Note that when the greedy reduce algorithm is invoked, a solution will be written with the name `[input]-solution.txt`.

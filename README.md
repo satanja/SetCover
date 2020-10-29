@@ -11,9 +11,6 @@ In terms of running time, it is safe to say that the tool is fast. Instances wit
 This project uses CMake and the C++20 STL. CMake can be downloaded [here](https://cmake.org/download/]).
 Alternatively, CMake can be installed with Visual Studio. Microsoft has given the [following guide](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=vs-2019) for Visual Studio 2019.
 
-## Building
-TODO.
-
 ## Usage
 
 ### Input Specification

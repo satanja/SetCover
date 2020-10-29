@@ -22,5 +22,5 @@ The tool requires inputs to have the following specification.
 *The tool has undefined behavior in case there is a space after the last element of each set*.
 
 ### Running the tool
-Copy the binary to `inputs/`, and in command prompt (or a terminal) use `setcover [mode] [input]`.
-Here, `[mode]` is either `0` or `1` for reducing the input once or using the greedy reduce algorithm on the instance respectively, and `[input]` is the selected input. Note that when the greedy reduce algorithm is invoked, a solution will be written with the name `[input]-solution.txt`.
+To run the tool, run the following command `setcover [mode] [input]` in a command prompt or terminal.
+Here, `[mode]` is either `0` or `1` for reducing the input once or using the greedy reduce algorithm on the instance respectively, and `[input]` is the path to desired input. Note that when the greedy reduce algorithm is invoked, a solution will be written with the name `[input]-solution.txt` in the current directory of the tool.

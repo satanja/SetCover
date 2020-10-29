@@ -188,48 +188,49 @@ private:
 	// ## Private reduction routines ##
 	void delete_elements(std::vector<int>& total)
 	{
-		// complexity = O(n * m log n)
-		for (int& i : total)
-		{
-			for (int & j : adj[i])
-			{
-				// remove_from_adj(i, j);
-				remove_from_set(i, j);
-				if (families[j].size() == 0)
-				{
-					deleted++;
-				}
-				update_count(i);
-			}
-		}
-		// complexity = O(m * n)
-		// but the above method only removes from sets which are affected...
-		// for (int i = 0; i < families.size(); i++)
+		// complexity = O(n^2 * m)
+		// but may perform well! 
+		// for (int& i : total)
 		// {
-		// 	std::vector<int> new_set(families[i].size());
-		// 	std::vector<int> family = families[i];
-		// 	auto it = std::set_difference(family.begin(),
-		// 								  family.end(),
-		// 								  total.begin(),
-		// 								  total.end(),
-		// 								  new_set.begin());
-		// 	new_set.resize(it - new_set.begin());
-			
-		// 	// maintain data structures in case set is cleared		
-		// 	if (new_set.size() == 0)
+		// 	for (int & j : adj[i])
 		// 	{
-		// 		// maintain adj and count
-		// 		for (int element : families[i])
+		// 		// remove_from_adj(i, j);
+		// 		remove_from_set(i, j);
+		// 		if (families[j].size() == 0)
 		// 		{
-		// 			remove_from_adj(element, i);
-		// 			update_count(element);
+		// 			deleted++;
 		// 		}
-
-		// 		// maintain deleted
-		// 		deleted++;
+		// 		update_count(i);
 		// 	}
-		// 	families[i] = new_set;
 		// }
+
+		// complexity = O(m * n)
+		// but may be slower than above algorithm. 
+		for (int i = 0; i < families.size(); i++)
+		{
+			std::vector<int> new_set(families[i].size());
+			std::vector<int> family = families[i];
+			auto it = std::set_difference(family.begin(),
+										  family.end(),
+										  total.begin(),
+										  total.end(),
+										  new_set.begin());
+			new_set.resize(it - new_set.begin());
+			
+			// maintain data structures in case set is cleared		
+			if (new_set.size() == 0)
+			{
+				// maintain adj and count
+				for (int element : families[i])
+				{
+					update_count(element);
+				}
+
+				// maintain deleted
+				deleted++;
+			}
+			families[i] = new_set;
+		}
 	}
 
 	// ## Finalization ##

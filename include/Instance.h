@@ -10,7 +10,8 @@
 #include "MinHeap.h"
 
 #pragma once
-class Instance {
+class Instance 
+{
 private:
 	std::set<int> universe;
 	std::vector<std::vector<int>> families;
@@ -136,6 +137,13 @@ private:
 		adj[element].erase(iter);
 	}
 
+	// removes an element from a set using a binary search
+	inline void remove_from_set(int element, int set)
+	{
+		auto iter = std::lower_bound(families[set].begin(), families[set].end(), element);
+		families[set].erase(iter);
+	}
+
 	// removes element from min_heap and max_heap 
 	void remove_from_heaps(int element)
 	{
@@ -180,32 +188,48 @@ private:
 	// ## Private reduction routines ##
 	void delete_elements(std::vector<int>& total)
 	{
-		for (int i = 0; i < families.size(); i++)
+		// complexity = O(n * m log n)
+		for (int& i : total)
 		{
-			std::vector<int> new_set(families[i].size());
-			std::vector<int> family = families[i];
-			auto it = std::set_difference(family.begin(),
-										  family.end(),
-										  total.begin(),
-										  total.end(),
-										  new_set.begin());
-			new_set.resize(it - new_set.begin());
-			
-			// maintain data structures in case set is cleared		
-			if (new_set.size() == 0)
+			for (int & j : adj[i])
 			{
-				// maintain adj and count
-				for (int element : families[i])
+				// remove_from_adj(i, j);
+				remove_from_set(i, j);
+				if (families[j].size() == 0)
 				{
-					remove_from_adj(element, i);
-					update_count(element);
+					deleted++;
 				}
-
-				// maintain deleted
-				deleted++;
+				update_count(i);
 			}
-			families[i] = new_set;
 		}
+		// complexity = O(m * n)
+		// but the above method only removes from sets which are affected...
+		// for (int i = 0; i < families.size(); i++)
+		// {
+		// 	std::vector<int> new_set(families[i].size());
+		// 	std::vector<int> family = families[i];
+		// 	auto it = std::set_difference(family.begin(),
+		// 								  family.end(),
+		// 								  total.begin(),
+		// 								  total.end(),
+		// 								  new_set.begin());
+		// 	new_set.resize(it - new_set.begin());
+			
+		// 	// maintain data structures in case set is cleared		
+		// 	if (new_set.size() == 0)
+		// 	{
+		// 		// maintain adj and count
+		// 		for (int element : families[i])
+		// 		{
+		// 			remove_from_adj(element, i);
+		// 			update_count(element);
+		// 		}
+
+		// 		// maintain deleted
+		// 		deleted++;
+		// 	}
+		// 	families[i] = new_set;
+		// }
 	}
 
 	// ## Finalization ##

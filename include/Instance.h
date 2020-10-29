@@ -220,7 +220,8 @@ private:
 			// maintain data structures in case set is cleared		
 			if (new_set.size() == 0)
 			{
-				// maintain adj and count
+				// we do not need to maintain adj[x] for x in total, since we remove x 
+				// from any set. Hence, only count needs to be maintained
 				for (int element : families[i])
 				{
 					update_count(element);
@@ -499,7 +500,7 @@ public:
 		}
 
 		std::vector<int> total(combined.begin(), combined.end());
-		delete_elements(total); // also maintains count & adj & deleted
+		delete_elements(total); // also maintains count & deleted
 		
 		// maintaining heaps
 		// we can remove all elements from total in max_heap

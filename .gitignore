@@ -2,4 +2,4 @@
 .vs/
 build/
 inputs/
-CMakeSettings.json/
+CMakeSettings.json

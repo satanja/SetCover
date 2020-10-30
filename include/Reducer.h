@@ -25,19 +25,16 @@ public:
 				std::vector<int> d = instance.include_unique_elements();
 				k.insert(k.end(), d.begin(), d.end());
 				reduced = true;
-				continue;
 			}
 
 			if (instance.remove_equals())
 			{
 				reduced = true;
-				continue;
 			}
 
 			if (instance.remove_subsets())
 			{
 				reduced = true;
-				continue;
 			}
 
 		} while (reduced);

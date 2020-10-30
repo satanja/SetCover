@@ -37,7 +37,7 @@ void read(Instance& instance, const std::string& file)
 			ss >> x;
 			family.push_back(x);
 		}
-		instance.add_family(family);
+		instance.add_family(std::move(family));
 	}
 	instance.initialize_heaps();
 }

@@ -257,11 +257,11 @@ public:
 	}
 
 	// Add a new set to the instance
-	void add_family(std::vector<int> family)
+	void add_family(std::vector<int>&& family)
 	{
 		last++;
-		families[last] = family;
-		for (int element : family)
+		families[last] = std::move(family);
+		for (int element : families[last])
 		{
 			count[element]++;
 			adj[element].push_back(last);

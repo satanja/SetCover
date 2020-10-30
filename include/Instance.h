@@ -159,7 +159,7 @@ private:
 
 
 	// decreases the count of the element by one
-	inline void update_count(int element)
+	inline void decrease_count(int element)
 	{
 		count[element]--;
 	}
@@ -170,7 +170,7 @@ private:
 		for (auto& element : set)
 		{
 			// element is present in 1 fewer set
-			update_count(element);
+			decrease_count(element);
 			remove_from_adj(element, index);
 
 			out_elements.insert(element);
@@ -194,7 +194,7 @@ private:
 		// 		{
 		// 			deleted++;
 		// 		}
-		// 		update_count(i);
+		// 		decrease_count(i);
 		// 	}
 		// }
 
@@ -218,7 +218,7 @@ private:
 				// from any set. Hence, only count needs to be maintained
 				for (int element : families[i])
 				{
-					update_count(element);
+					decrease_count(element);
 				}
 
 				// maintain deleted
@@ -298,13 +298,11 @@ public:
 		return families.size();
 	}
 
-	// returns a set
 	std::vector<int> get_set(int i)
 	{
 		return families[i];
 	}
 
-	// returns the universe
 	std::set<int> get_universe()
 	{
 		return universe;
@@ -326,7 +324,6 @@ public:
 		return max_heap.peek_max().second >= families.size() - deleted;
 	}
 
-	// Returns whether the instance is empty
 	bool is_empty()
 	{
 		return universe.size() == 0;

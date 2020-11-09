@@ -333,7 +333,8 @@ public:
 	bool remove_equals()
 	{
 		bool result = false;
-		std::map<std::vector<int>, std::vector<int>> subsets;
+		std::map<std::vector<int>, int> subsets;
+		std::unordered_set<int> updated_elements;
 		for (int i = 0; i < families.size(); i++)
 		{
 			std::vector<int>& set = families[i];
@@ -341,25 +342,16 @@ public:
 			if (subsets.count(set) > 0)
 			{
 				result = true;
-				subsets.at(set).push_back(i);
+				int x = subsets.at(set);
+				subset_update(families[x], x, updated_elements);
+				subsets.at(set) = i;
 			}
 			else
 			{
-				std::vector<int> subset = { i };
-				subsets.insert(std::make_pair(set, subset));
+				subsets.insert(std::make_pair(set, i));
 			}
 		}
 
-		// remove all but one set
-		std::unordered_set<int> updated_elements;
-		for (auto [key, list] : subsets)
-		{
-			for (int i = 0; i < list.size() - 1; i++)
-			{
-				int index = list[i];
-				subset_update(families[index], index, updated_elements);
-			}
-		}
 		for (auto element : updated_elements)
 		{
 			decrease_heaps(element);

@@ -2,4 +2,5 @@
 .vs/
 build/
 inputs/
+generation/
 CMakeSettings.json

@@ -131,6 +131,33 @@ private:
 		adj[element].erase(iter);
 	}
 
+	void decrease_count_equals(const std::vector<int>& elements, const int delta) 
+	{
+		for (int element : elements) {
+			count[element] -= delta;
+		}
+	}
+
+	void remove_sets_from_adj(const std::vector<int>& elements, const std::vector<int>& sets)
+	{
+		for (int element : elements) 
+		{
+			std::vector<int> list = adj[element];
+			std::vector<int> new_list(list.size());
+			auto it = std::set_difference(list.begin(), list.end(), sets.begin(), sets.end(), new_list.begin());
+			new_list.resize(it - new_list.begin());
+			adj[element] = new_list;			
+		}
+	}
+
+	void clear_sets(const std::vector<int>& sets) 
+	{
+		for (int set : sets)
+		{
+			families[set].clear();
+		}
+	}
+
 	// removes an element from a set using a binary search
 	inline void remove_from_set(int element, int set)
 	{
@@ -333,7 +360,7 @@ public:
 	bool remove_equals()
 	{
 		bool result = false;
-		std::map<std::vector<int>, int> subsets;
+		std::map<std::vector<int>, std::vector<int>> subsets;
 		std::unordered_set<int> updated_elements;
 		for (int i = 0; i < families.size(); i++)
 		{
@@ -342,13 +369,26 @@ public:
 			if (subsets.count(set) > 0)
 			{
 				result = true;
-				int x = subsets.at(set);
-				subset_update(families[x], x, updated_elements);
-				subsets.at(set) = i;
+				subsets.at(set).push_back(i);
 			}
 			else
 			{
-				subsets.insert(std::make_pair(set, i));
+				subsets.insert(std::make_pair(set, std::vector<int>(0)));
+			}
+		}
+
+		for (auto [key, list] : subsets)
+		{
+			if (list.size() > 0)
+			{
+				for (int element : key)
+				{
+					updated_elements.insert(element);
+				}
+				decrease_count_equals(key, list.size());
+				std::vector<int> sets = std::move(list);
+				remove_sets_from_adj(key, sets);
+				clear_sets(sets);
 			}
 		}
 

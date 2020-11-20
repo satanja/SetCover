@@ -111,7 +111,7 @@ private:
 	}
 
 	// Returns the intersection of left and right
-	std::vector<int> join(std::vector<int>& left, std::vector<int>& right)
+	std::vector<int> join(const std::vector<int>& left, const std::vector<int>& right)
 	{
 		size_t size = std::max(left.size(), right.size());
 		std::vector<int> joined(size);

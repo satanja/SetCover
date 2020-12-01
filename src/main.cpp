@@ -37,16 +37,8 @@ void read(Instance& instance, const std::string& file)
 		{
 			if (c != ' ' && c != '\r' && c != '\n')
 			{
-				if (first)
-				{
-					k = c - '0';
-					first = false;
-				}
-				else 
-				{
-					k *= 10;
-					k += c - '0';
-				}
+				k *= 10;
+				k += c - '0';
 			}
 			else
 			{

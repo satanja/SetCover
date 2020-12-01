@@ -31,7 +31,6 @@ void read(Instance& instance, const std::string& file)
 		getline(input, str);
 		std::vector<int> family;
 
-		bool first = true;
 		int k = 0;
 		for (char const& c : str)
 		{
@@ -44,7 +43,6 @@ void read(Instance& instance, const std::string& file)
 			{
 				family.push_back(k);
 				k = 0;
-				first = true;
 			}
 		}
 		family.push_back(k);

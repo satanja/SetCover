@@ -29,14 +29,34 @@ void read(Instance& instance, const std::string& file)
 	for (int i = 0; i < fs; i++)
 	{
 		getline(input, str);
-		std::istringstream ss(str);
 		std::vector<int> family;
-		while (!ss.eof())
+
+		bool first = true;
+		int k = 0;
+		for (char const& c : str)
 		{
-			int x;
-			ss >> x;
-			family.push_back(x);
+			if (c != ' ' && c != '\r' && c != '\n')
+			{
+				if (first)
+				{
+					k = c - '0';
+					first = false;
+				}
+				else 
+				{
+					k *= 10;
+					k += c - '0';
+				}
+			}
+			else
+			{
+				family.push_back(k);
+				k = 0;
+				first = true;
+			}
 		}
+		family.push_back(k);
+
 		instance.add_family(std::move(family));
 	}
 	instance.initialize_heaps();
@@ -55,7 +75,6 @@ int main(int argc, char* argv[])
 	if (*argv[1] == '0')
 	{
 		std::cout << "initialize time = " << duration.count() << "s" << "\n";
-
 		std::cout << "\n";
 		std::cout << "original:" << "\n";
 		std::cout << "|U| = " << instance.universe_size() << "\n";
